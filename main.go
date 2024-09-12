@@ -1,42 +1,62 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{}
+var addr = flag.String("addr", "localhost:8080", "http service address")
+
+var upgrader = websocket.Upgrader{} // use default options
 
 func echo(w http.ResponseWriter, r *http.Request) {
-  c, err := upgrader.Upgrade(w, r, nil)
-  if err != nil {
-    log.Printf("upgrade:", err)
-    return
-  }
-  defer c.Close()
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Print("upgrade:", err)
+		return
+	}
+	defer c.Close()
+	for {
+		mt, message, err := c.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			break
+		}
 
-  for {
-    mt, message, err := c.ReadMessage()
-    if err != nil {
-      log.Printf("read:", err)
-      break
-    }
-
-    log.Printf("received message: %v", message)
-    err = c.WriteMessage(mt, message)
-    if err != nil {
-      log.Println("write:", err)
-      break
-    }
-  }
+		log.Printf("recv: %s", message)
+		err = c.WriteMessage(mt, message)
+		if err != nil {
+			log.Println("write:", err)
+			break
+		}
+	}
 }
 
-// The Black Swan
-// You are right
+func home(w http.ResponseWriter, r *http.Request) {
+  command := map[string]interface{}{
+    "command": "send hello abc",
+    "ano": "helloworld",
+    "uno": "sentan",
+  }
+
+  jsonData, err := json.Marshal(command)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+  }
+
+  w.Header().Set("Content-Type", "application/json")
+
+  w.Write(jsonData)
+}
 
 func main() {
-  http.HandleFunc("/", echo)
-  log.Fatal(http.ListenAndServe(":8080", nil))
+	flag.Parse()
+	log.SetFlags(0)
+	http.HandleFunc("/echo", echo)
+	http.HandleFunc("/", home)
+	log.Fatal(http.ListenAndServe(*addr, nil))
 }

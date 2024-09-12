@@ -4,7 +4,9 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+addr	main.go	/^var addr = flag.String("addr", "localhost:8080", "http service address")$/;"	v
 echo	main.go	/^func echo(w http.ResponseWriter, r *http.Request) {$/;"	f
+home	main.go	/^func home(w http.ResponseWriter, r *http.Request) {$/;"	f
 main	main.go	/^func main() {$/;"	f
 main	main.go	/^package main$/;"	p
-upgrader	main.go	/^var upgrader = websocket.Upgrader{}$/;"	v
+upgrader	main.go	/^var upgrader = websocket.Upgrader{} \/\/ use default options$/;"	v
